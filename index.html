@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'">
+     <link rel="stylesheet" href="./Herramientas/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+     <link rel="stylesheet" href="./Estilos/styles.css">
+    <title>Index</title>
+
+  </head>
+  <body style="padding-top:20px;">
+
+    <div id="app">
+
+
+      <div class="wrapper">
+        <div class="top_navbar">
+          <div class="hamburger">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+          <div class="top_menu">
+            <div class="logo">Administrador de Contenido</div>
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <ul>
+            <li>
+              <a href="#">
+                <span class="icon ">
+                  <img src="./Iconos/road.png" width="25" height="25">
+                </span>
+                <span class="title">Canales</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="active">
+                <span class="icon ">
+                  <img src="./Iconos/target.png" width="25" height="25">
+                </span>
+                <span class="title">Puntos</span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <span class="icon ">
+                  <img src="./Iconos/report.png" width="25" height="25">
+                </span>
+                <span class="title">Reportes</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="main_container">
+          <div class="item">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          </div>
+
+          <div class="item">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          </div>
+
+          <div class="item">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          </div>
+
+          <div class="item">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+          </div>
+        </div>
+
+
+      </div>
+
+
+
+    </div>
+
+  </body>
+  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+  <script src="./Herramientas/jquery/jquery-3.4.1.js"></script>
+  <script src="./Herramientas/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+  <script src="./Herramientas/Vue/vue.js"></script>
+  <script>
+    console.log(window.module);
+    $(document).ready(function(){
+      $(".hamburger").click(function(){
+        $(".wrapper").toggleClass("back");
+      })
+    });
+  </script>
+  <script>
+    require("./renderer.js");
+  </script>
+  <script>if (window.module) module = window.module;</script>
+</html>

@@ -1,0 +1,31 @@
+{
+  "name": "cms",
+  "version": "1.0.0",
+  "description": "cms that manages acupucture data project",
+  "main": "main.js",
+  "scripts": {
+    "test": "electron .",
+    "watch": "nodemon --exec 'electron .'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/digitalnevada30/CMS-Acupunture.git"
+  },
+  "keywords": [
+    "electron",
+    "vue",
+    "cms"
+  ],
+  "author": "Arturo Rodriguez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/digitalnevada30/CMS-Acupunture/issues"
+  },
+  "homepage": "https://github.com/digitalnevada30/CMS-Acupunture#readme",
+  "dependencies": {
+    "electron": "^8.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
