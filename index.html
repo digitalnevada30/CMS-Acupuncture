@@ -11,9 +11,6 @@
   </head>
   <body style="padding-top:20px;">
 
-    <div id="app">
-
-
       <div class="wrapper">
         <div class="top_navbar">
           <div class="hamburger">
@@ -26,18 +23,18 @@
           </div>
         </div>
 
-        <div class="sidebar">
+        <div class="sidebar" id="modulos">
           <ul>
             <li>
-              <a href="#">
-                <span class="icon ">
+              <a href="#" :class="claseCanales" @click="cambiar('canales')">
+                <span class="icon">
                   <img src="./Iconos/road.png" width="25" height="25">
                 </span>
                 <span class="title">Canales</span>
               </a>
             </li>
             <li>
-              <a href="#" class="active">
+              <a href="#" :class="clasePuntos" @click="cambiar('puntos')">
                 <span class="icon ">
                   <img src="./Iconos/target.png" width="25" height="25">
                 </span>
@@ -45,43 +42,579 @@
               </a>
             </li>
             <li>
-              <a href="#">
+              <a href="#" :class="claseReportes" @click="cambiar('reportes')">
                 <span class="icon ">
                   <img src="./Iconos/report.png" width="25" height="25">
                 </span>
                 <span class="title">Reportes</span>
               </a>
             </li>
+            <li>
+              <a href="#" :class="claseGrupos" @click="cambiar('grupos')">
+                <span class="icon">
+                  <img src="./Iconos/group.png" width="25" height="25">
+                </span>
+                <span class="title">Grupos</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" :class="claseRuta" @click="cambiar('ruta')">
+                <span class="icon ">
+                  <img src="./Iconos/folder.png" width="25" height="25">
+                </span>
+                <span class="title">Proyecto</span>
+              </a>
+            </li>
           </ul>
         </div>
 
         <div class="main_container">
-          <div class="item">
+                                                        <!-- :::::::::: Modulo de canales :::::::::: -->
+          <div id="modCanales" style="display:none;">
+            <div class="contenedorCanales">
+              <div class="row justify-content-around funcionesCanales">
+                <div class="col-md-3"><button class="btn btn-outline-primary" @click="nuevo">Nuevo</button></div>
+                <div class="col-md-3"><button v-if="verBtnFormulario()" class="btn btn-outline-success" @click="editar">Editar</button></div>
+                <div class="col-md-3"><button v-if="verBtnFormulario()" class="btn btn-outline-danger" @click="eliminar">Eliminar</button></div>
+              </div>
+              <div class="row">
+                <div class="col-md-5 columnaCanales">
+                  <div type="button" v-for="elemento in canales" :id="elemento['id']" class="listaCanales" @click="mostrarInformacion(elemento['id'])">{{elemento['nombre']}}</div>
+                </div>
+                <div class="col-md-7">
+                  <div class="row justify-content-center">
+                    <div v-if="verFormulario('i')" class="col-md-12">
+
+                      <div class="row">
+                        <div class="col-md-12 justify-content-center">
+                          <table id="tablaCanales" cellspacing="15px">
+                            <tr>
+                              <td class="tablaTituloCanales"><b>Título</b></td>
+                              <td class="tablaValoresCanales">{{iTitulo}}</td>
+                            </tr>
+                            <tr>
+                              <td class="tablaTituloCanales"><b>ID</b></td>
+                              <td class="tablaValoresCanales">{{iID}}</td>
+                            </tr>
+                            <tr>
+                              <td class="tablaTituloCanales"><b>Nombre</b></td>
+                              <td class="tablaValoresCanales">{{iNombre}}</td>
+                            </tr>
+                            <tr>
+                              <td class="tablaTituloCanales"><b>Tipo</b></td>
+                              <td class="tablaValoresCanales">{{mostrarTipo()}}</td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="verFormulario('n')" class="col-md-8">
+                      <div class="row mt-1">
+                        <div class="col-md-12">
+                          <h3>Identificador</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="id de una palabra ej. delgado" v-model="nID">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Archivo</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Archivo JSON ej. delgado.json" v-model="nArchivo">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Nombre</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Nombre del canal ej. I. Delgado" v-model="nNombre">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Título</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Título ej. Canal del Intestino Delgado" v-model="nTitulo">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Tipo</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <select class="custom-select" id="inputGroupSelect01" v-model="nTipo">
+                            <option value="" selected>Elegir...</option>
+                            <option value="o">Órgano</option>
+                            <option value="v">Víscera</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="row justify-content-center">
+                        <div class="col-md-4 mt-2">
+                          <button type="button" class="btn btn-primary" @click="guardar('n')">Guardar</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="verFormulario('e')" class="col-md-8">
+                      <div class="row mt-1">
+                        <div class="col-md-12">
+                          <h3>Identificador</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="id de una palabra ej. delgado" v-model="nID">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Archivo</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Archivo JSON ej. delgado.json" v-model="nArchivo">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Nombre</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Nombre del canal ej. I. Delgado" v-model="nNombre">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Título</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Título ej. Canal del Intestino Delgado" v-model="nTitulo">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Tipo</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <select class="custom-select" id="inputGroupSelect01" v-model="nTipo">
+                            <option value="" selected>Elegir...</option>
+                            <option value="o">Órgano</option>
+                            <option value="v">Víscera</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="row justify-content-center">
+                        <div class="col-md-4 mt-2">
+                          <button type="button" class="btn btn-primary" @click="guardar('e')">Guardar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                                                        <!-- :::::::::: Modulo de puntos :::::::::: -->
+          <div id="modPuntos" style="display:none;">
+            <div class="contenedorCanales">
+              <div class="row funcionesPuntos">
+                <div class="col-md-5">
+                  <div class="row justify-content-center">
+                    <div class="col-md-6">
+                      <select class="selectPuntos" v-model="canalSeleccionado" v-on:change="cambiarCanal()">
+                        <option value="-">Seleccione</option>
+                        <option v-for="el in canales" v-bind:value="el['archivo']">{{el['nombre']}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-7">
+                  <div class="row justify-content-around">
+                    <div class="col-md-3" v-if="canalSeleccionado !== '-'"><button class="btn btn-outline-primary" @click="nuevo()">Nuevo</button></div>
+                    <div class="col-md-3" v-if="mostrarBoton('e')" ><button class="btn btn-outline-success" @click="editar()">Editar</button></div>
+                    <div class="col-md-3" v-if="mostrarBoton('d')"><button class="btn btn-outline-danger" @click="eliminar()">Eliminar</button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="row secInfoPuntos">
+                <!-- seccion lista -->
+                <div class="col-md-6 scrollPuntos">
+                  <!-- Puntos -->
+                  <div class="row justify-content-between tituloPuntos">
+                    <div class="col-md-4 text-center"><h4>Puntos</h4></div>
+                    <div class="col-md-2"><a @click="ocultar('btnPuntos')"><img src="./Iconos/puntos.png" width="27" height="27"></a></div>
+                  </div>
+                  <div class="row" id="btnPuntos">
+                    <div class="col-md-12 columnaPuntos">
+                      <div :id="nombre+'p'" type="button" v-for="(nombre,index) in listaPuntos" class="listaCanales" @click="mostrarInformacion(nombre,'p', index)">{{nombre}}</div>
+                    </div>
+                  </div>
+
+                  <!-- Elemento -->
+                  <div class="row justify-content-between tituloPuntos">
+                    <div class="col-md-4 text-center"><h4>Elemento</h4></div>
+                    <div class="col-md-2"><a @click="ocultar('btnElementos')"><img src="./Iconos/puntos.png" width="27" height="27"></a></div>
+                  </div>
+                  <div class="row ocultarPuntos" id="btnElementos">
+                    <div class="col-md-12 columnaPuntos">
+                      <div :id="elem['valor']+'e'" type="button" v-for="(elem,index) in listaElemento" class="listaCanales" @click="mostrarInformacion(elem['valor'],'e', index)">{{elem['valor']}}</div>
+                    </div>
+                  </div>
+
+                  <!-- Afuera -->
+                  <div class="row justify-content-between tituloPuntos">
+                    <div class="col-md-4 text-center"><h4>Afuera</h4></div>
+                    <div class="col-md-2"><a @click="ocultar('btnAfuera')"><img src="./Iconos/puntos.png" width="27" height="27"></a></div>
+                  </div>
+                  <div class="row ocultarPuntos" id="btnAfuera">
+                    <div class="col-md-12 columnaPuntos">
+                      <div :id="elem['valor']+'a'" type="button" v-for="(elem,index) in listaAfuera" class="listaCanales" @click="mostrarInformacion(elem['valor'],'a', index)">{{elem['valor']}}</div>
+                    </div>
+                  </div>
+                </div>
+                <!-- seccion informacion -->
+                <div class="col-md-6">
+                  <div id="divEditar" class="row">
+                    <!-- punto info-->
+                    <div v-if="verFormulario('p')" class="col-md-11">
+                      <div class="row infoPuntos">
+                        <div class="col-md-12">
+                          <h3>Importancia</h3>
+                          <p>{{importancia}}</p>
+                          <br>
+                          <h3>Indicaciones</h3>
+                          <p>{{indicaciones}}</p>
+                          <br>
+                          <h3>Observaciones</h3>
+                          <p>{{observaciones}}</p>
+                          <br>
+                          <h3>Función</h3>
+                          <p>{{funcion}}</p>
+                          <br>
+                          <h3>Posición</h3>
+                          <p>{{posicion}}</p>
+                          <br>
+                          <h3>Localización</h3>
+                          <p>{{localizacion}}</p>
+                          <br>
+                          <h3>Nombre</h3>
+                          <p>{{nombre}}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- elemento info -->
+                    <div v-if="verFormulario('e')" class="col-md-11">
+                      <div class="row info-puntos">
+                        <div class="col-md-12">
+                          <h3>Elemento</h3>
+                          <p>{{elemento}}</p>
+                          <br>
+                          <h3>Nombre</h3>
+                          <p>{{nombre}}</p>
+                          <br>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- afuera info -->
+                    <div v-if="verFormulario('a')" class="col-md-11">
+                      <div class="row info-puntos">
+                        <div class="col-md-12">
+                          <h3>Elemento</h3>
+                          <p>{{clave}}</p>
+                          <br>
+                          <h3>Nombre</h3>
+                          <p>{{nombre}}</p>
+                          <br>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- elemento edit -->
+                    <div v-if="verFormulario('edit-e')" class="col-md-11">
+                      <div class="row">
+                        <div class="col-md-11">
+                          <div class="row justify-content-center">
+                            <div class="col-md-8">
+                              <h3>Formulario Elemento</h3>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h3>Nombre</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Introduce el Nombre" v-model="nombre">
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h3>Elemento</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <select class="selectPuntos" v-model="elemento">
+                                <option value="-">Seleccionar</option>
+                                <option value="tierra">Tierra</option>
+                                <option value="madera">Madera</option>
+                                <option value="fuego">Fuego</option>
+                                <option value="agua">Agua</option>
+                                <option value="metal">Metal</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="row justify-content-center pt-3">
+                            <div class="col-md-3">
+                              <button type="button" class="btn btn-primary" @click="guardar()">Guardar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- afuera edit -->
+                    <div v-if="verFormulario('edit-a')" class="col-md-11">
+                      <div class="row">
+                        <div class="col-md-11">
+                          <div class="row justify-content-center">
+                            <div class="col-md-8">
+                              <h3>Formulario Afuera</h3>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h3>Nombre</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Introduce el Nombre" v-model="nombre">
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h3>Clave</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Introduce la clave" v-model="clave">
+                            </div>
+                          </div>
+                          <div class="row justify-content-center pt-3">
+                            <div class="col-md-3">
+                              <button type="button" class="btn btn-primary" @click="guardar()">Guardar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- puntos edit -->
+                    <div v-if="verFormulario('edit-p')" class="col-md-11">
+                      <div class="row">
+                        <div class="col-md-11">
+                          <div class="row justify-content-center">
+                            <div class="col-md-10">
+                              <h3>Formulario Punto</h3>
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h3>Nombre</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Introduce el Nombre" v-model="clave">
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <p>* Por favor una vez guardado el elemento llenar los campos en la aplicación</p>
+                            </div>
+                          </div>
+                          <div class="row justify-content-center pt-3">
+                            <div class="col-md-3">
+                              <button type="button" class="btn btn-primary" @click="guardar()">Guardar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                  </div>
+                  <div id="divNuevo" class="row ocultarFormularios">
+                    <div class="row">
+                      <div class="col-md-4">
+                        <h3>Selecciona Formulario</h3>
+                      </div>
+                      <div class="col-md-5">
+                        <select class="selectPuntos" v-model="tipoNuevo" @change="seleccionarForm()">
+                          <option value="-">Seleccionar</option>
+                          <option value="p">Puntos</option>
+                          <option value="e">Elemento</option>
+                          <option value="a">Afuera</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                                                        <!-- :::::::::: Modulo de reportes :::::::::: -->
+          <div id="modReportes" style="display:none;">
+            Este Texto corresponde al modulo de los Reportes <br>
             Lorem ipsum dolor sit amet, consectetur adipisicing elit,
             sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
             Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
             nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
           </div>
 
-          <div class="item">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+                                                        <!-- :::::::::: Modulo de grupos :::::::::: -->
+          <div id="modGrupos" style="display:none;">
+            <div class="contenedorCanales">
+              <div class="row justify-content-around funcionesCanales">
+                <div class="col-md-3"><button class="btn btn-outline-primary" @click="nuevo">Nuevo</button></div>
+                <div class="col-md-3"><button v-if="verBtnFormulario()" class="btn btn-outline-success" @click="editar">Editar</button></div>
+                <div class="col-md-3"><button v-if="verBtnFormulario()" class="btn btn-outline-danger" @click="eliminar">Eliminar</button></div>
+              </div>
+              <div class="row">
+                <div class="col-md-5 columnaCanales">
+                  <div type="button" v-for="(elementos,index) in grupos" :id="grupos[index]['nombre']" class="listaCanales" @click="mostrarInformacion(grupos[index]['nombre'], index)">{{grupos[index]['nombre']}}</div>
+                </div>
+                <div class="col-md-7">
+                  <div class="row justify-content-center">
+                    <div v-if="verFormulario('i')" class="col-md-12">
+
+                      <div class="row">
+                        <div class="col-md-12 justify-content-center">
+                          <table id="tablaCanales" cellspacing="15px">
+                            <tr>
+                              <td class="tablaTituloCanales"><b>Nombre</b></td>
+                              <td class="tablaValoresCanales">{{iNombre}}</td>
+                            </tr>
+                            <tr>
+                              <td class="tablaTituloCanales"><b>Semestre</b></td>
+                              <td class="tablaValoresCanales">{{despliegaSemestre()}}</td>
+                            </tr>
+                            <tr>
+                              <td class="tablaTituloCanales"><b>Año</b></td>
+                              <td class="tablaValoresCanales">{{iyear}}</td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="verFormulario('n')" class="col-md-8">
+                      <div class="row mt-1">
+                        <div class="col-md-12">
+                          <h3>Nombre</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Nombre del grupo ej. 3CV4" v-model="iNombre">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Semestre</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <select class="custom-select" id="inputGroupSelect01" v-model="iSemestre">
+                            <option value="" selected>Elegir...</option>
+                            <option value="1">enero - julio</option>
+                            <option value="2">agosto - diciembre</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Año</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="number" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Año del curso ej. 2020" v-model="iyear">
+                        </div>
+                      </div>
+
+                      <div class="row justify-content-center">
+                        <div class="col-md-4 mt-2">
+                          <button type="button" class="btn btn-primary" @click="guardar('n')">Guardar</button>
+                        </div>
+                      </div>
+
+                    </div>
+
+
+                    <div v-if="verFormulario('e')" class="col-md-8">
+                      <div class="row mt-1">
+                        <div class="col-md-12">
+                          <h3>Nombre</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Nombre del grupo ej. 3CV4" v-model="iNombre">
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Semestre</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <select class="custom-select" id="inputGroupSelect01" v-model="iSemestre">
+                            <option value="" selected>Elegir...</option>
+                            <option value="1">enero - julio</option>
+                            <option value="2">agosto - diciembre</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <h3>Año</h3>
+                        </div>
+                        <div class="col-md-12">
+                          <input type="number" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Año del curso ej. 2020" v-model="iyear">
+                        </div>
+                      </div>
+
+                      <div class="row justify-content-center">
+                        <div class="col-md-4 mt-2">
+                          <button type="button" class="btn btn-primary" @click="guardar('e')">Guardar</button>
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div class="item">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-          </div>
+          <div id="modRuta" style="display:block;">
+            <div class="contenedorRuta">
+              <div class="contenidoRuta">
+                <div class="row">
+                  <div class="col-md-12 text-center">
+                    <p><h4>La carpeta de la aplicación de Acupuntura es: </h4></p>
+                    <p><h6>"{{ruta}}"</h6></p>
+                  </div>
+                </div>
 
-          <div class="item">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+                <div class="row d-flex justify-content-center align-items-end" style="height: 50%;">
+                  <div class="col-md-2">
+                    <button class="btn btn-info" @click="seleccionarCarpeta">Cambiar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -89,13 +622,11 @@
       </div>
 
 
-
-    </div>
-
   </body>
   <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
   <script src="./Herramientas/jquery/jquery-3.4.1.js"></script>
   <script src="./Herramientas/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+  <script src="./Herramientas/SweetAlert/sweetalert.min.js"></script>
   <script src="./Herramientas/Vue/vue.js"></script>
   <script>
     console.log(window.module);

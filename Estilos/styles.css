@@ -1,11 +1,154 @@
 * {
-
   font-family:'Montserrat', sans-serif;
   list-style: none;
 }
 
 body {
   background : #e1ecf2;
+}
+/*...:::...seccion de puntos...:::...*/
+.infoPuntos{
+  height: 470px;
+  overflow-y: scroll;
+}
+.tituloPuntos{
+  margin-top: 5px;
+  /*margin-bottom: 5px;*/
+  background: #b6b0c2;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  width: 103%;
+  height: 45px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+.ocultarFormularios{
+  display:none;
+}
+.ocultarPuntos{
+  display:none;
+}
+.scrollPuntos{
+  height: 470px;
+  overflow-y: scroll;
+}
+.columnaPuntos{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  height: 300px;
+  overflow-y: scroll;
+  background: #4287f5;
+}
+.contenedorPuntos{
+  height: 550px;
+  background: #fff;
+}
+.secInfoPuntos{
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.funcionesPuntos{
+  background: #07081a;
+  border-radius: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.selectPuntos{
+  width: 200px;
+  height: 35px;
+  border-radius: 20px;
+}
+/*...:::...seccion de canales...:::...*/
+#tablaCanales{
+  width: 80%;
+}
+
+#tablaCanales td{
+  height: 60px;
+}
+#tablaCanales tr{
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.tablaTituloCanales{
+  font-size: 25px;
+  padding-left: 5px;
+}
+.tablaValoresCanales{
+  font-size: 20px;
+  padding-left: 5px;
+}
+
+.funcionesCanales{
+  background: #07081a;
+  border-radius: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.columnaCanales{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.listaCanalesActivo{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 35px;
+  width: 160px;
+  background: #ccc8c8;
+  color: #000;
+  border-radius: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+
+  border-style: solid;
+  border-color: #000;
+}
+
+.listaCanales{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 35px;
+  width: 160px;
+  background: #055a6b;
+  color: #fff;
+  border-radius: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.contenedorCanales{
+  height: 550px;
+  background: #fff;
+}
+/*...:::...seccion de ruta...:::...*/
+.contenedorRuta{
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #041c4a;/*000e29*/
+}
+.contenidoRuta{
+  width: 70%;
+  height: 50%;
+  border-radius: 20px;
+  background: #e6e6e6;
 }
 
 .wrapper{
@@ -113,19 +256,19 @@ body {
 
 .wrapper .main_container{
   width: calc(100% - 200px);
-  margin-top: 70px;
+  margin-top: 60px;
   margin-left: 200px;
   padding: 15px;
   transition: all 0.3s ease;
 }
 
-.wrapper .main_container .item{
+/*.wrapper .main_container .item{
   background: #fff;
   margin-bottom: 10px;
   padding: 15px;
   font-size: 14px;
   line-height: 22px;
-}
+}*/
 
 .wrapper.back .sidebar{
   width: 70px;

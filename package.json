@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/digitalnevada30/CMS-Acupunture#readme",
   "dependencies": {
-    "electron": "^8.2.0"
+    "electron": "^8.2.0",
+    "jquery": "^3.5.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
