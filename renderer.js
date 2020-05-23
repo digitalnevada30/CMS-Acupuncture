@@ -39,7 +39,7 @@ const Modelo = {
 };
 
 const VerificarCadenas = {
-  patron: /^[A-Z]{1}[a-zA-Z0-9 ]*$/,
+  patron: /^[A-Z]{1}[a-zA-Z0-9_]*$/,
   patronMayus: /^[A-Z]{1}[A-Z0-9]*$/,
   verificar: function(cadena){
     return this.patron.test(cadena);
@@ -609,6 +609,8 @@ var modPuntos = new Vue({
     guardar: async function(){
       let tipoTMP = this.tipo.split('-')[1];
       let respuesta = false;
+      this.clave = this.clave.replace(/\ /g, '_');
+      console.log(this.clave);
       if(this.tipoNuevo !== '-'){
         if(this.canalSeleccionado === ''){
           swal('Advertencia', 'Favor de elegir un canal', 'warning');
@@ -1293,12 +1295,16 @@ var modGrupos = new Vue({
   }
 });
 
-var modRuta = new Vue({
+var modAudio = new Vue({
   el: '#modAudio',
   data:{
     audio: ''
   },
   methods:{
+    seleccionarArchivo: function(){
+      console.log('archivo nuevo');
+      ipcRenderer.send('channelAudio', '');
+    }
   }
 });
 

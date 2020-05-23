@@ -1,6 +1,7 @@
 //Modules
 const {app, BrowserWindow, session, ipcMain, dialog} = require('electron')
 const fs = require('fs')
+const path = require('path')
 
 let mainWindow
 let rutaProyecto
@@ -69,6 +70,26 @@ ipcMain.on('guardar-canal', (e, args) => {
 ipcMain.on('obtenerInfo-request', (e,args) => {
   var contenido = fs.readFileSync(args, 'utf8');
   e.sender.send('obtenerInfo-response', contenido);
+})
+
+ipcMain.on('channelAudio', (e,args) => {
+  dialog.showOpenDialog(mainWindow, {
+    defaultPath: app.getPath('desktop'),
+    properties: ['openFile'],
+    filters: [
+    { name: 'Audio Files', extensions: ['mp3'] }
+  ]
+  }).then(result => {
+    if(result.canceled){
+      e.sender.send('channelAudio-res', {ok:''});
+    }else{
+      console.log(result.filePaths[0]);
+      let nombre = result.filePaths[0].split(path.sep);
+      console.log(nombre[nombre.length-1]);
+      //transferir el archivo
+      //fs.copyFileSync(, 'destination.txt');
+    }
+  })
 })
 
 ipcMain.on('channel1', (e,args) => {
