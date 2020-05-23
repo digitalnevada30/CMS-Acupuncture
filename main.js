@@ -37,6 +37,10 @@ function createWindow(){
 }
 
 /*IPC functions*/
+ipcMain.on('oi-reportes-grupos-req', (e,args) => {
+  var contenido = fs.readFileSync(args, 'utf8');
+  e.sender.send('oi-reportes-grupos-res', contenido);
+})
 ipcMain.on('oi-puntos-puntos-req', (e,args) => {
   var contenido = fs.readFileSync(args, 'utf8');
   e.sender.send('oi-puntos-puntos-res', contenido);
@@ -48,6 +52,10 @@ ipcMain.on('oi-puntos-canales-req', (e,args) => {
 ipcMain.on('OI-grupos-req', (e, args) => {
   var contenido = fs.readFileSync(args, 'utf8');
   e.sender.send('OI-grupos-res', contenido);
+})
+ipcMain.on('guardar-punto-req', (e, args) => {
+  fs.writeFileSync(args[0], JSON.stringify(args[1]), 'utf8');
+  e.sender.send('guardar-punto-res', {ok: 'Archivo Guardado'});
 })
 ipcMain.on('guardar-grupo-req', (e, args) => {
   fs.writeFileSync(args[0], JSON.stringify(args[1]), 'utf8');
@@ -64,7 +72,6 @@ ipcMain.on('obtenerInfo-request', (e,args) => {
 })
 
 ipcMain.on('channel1', (e,args) => {
-  console.log('args: ' + args)
   dialog.showOpenDialog(mainWindow, {
     defaultPath: app.getPath('desktop'),
     properties: ['openDirectory']

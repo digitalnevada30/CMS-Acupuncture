@@ -2,6 +2,7 @@ console.log(process);
 const {ipcRenderer} = require('electron')
 const path = require('path');
 const $ = require('jquery');
+const Chart = require('chart.js');
 
 const Modelo = {
   obtenerInformacion: function(archivo, tipo){
@@ -16,8 +17,10 @@ const Modelo = {
         ipcRenderer.send('oi-puntos-canales-req', archivo);
         break;
       case 'pp':
-        console.log('Archivo: ' + archivo);
         ipcRenderer.send('oi-puntos-puntos-req', archivo);
+        break;
+      case 'r':
+        ipcRenderer.send('oi-reportes-grupos-req', archivo);
         break;
     }
   },
@@ -27,9 +30,22 @@ const Modelo = {
   },
   guardarGrupo: function(archivo, objeto){
     let tmp = [archivo, objeto];
-    console.log('objeto Modelo:');
-    console.log(objeto);
     ipcRenderer.send('guardar-grupo-req', tmp);
+  },
+  guardarPunto: function(archivo, objeto){
+    let tmp = [archivo, objeto];
+    ipcRenderer.send('guardar-punto-req', tmp);
+  }
+};
+
+const VerificarCadenas = {
+  patron: /^[A-Z]{1}[a-zA-Z0-9 ]*$/,
+  patronMayus: /^[A-Z]{1}[A-Z0-9]*$/,
+  verificar: function(cadena){
+    return this.patron.test(cadena);
+  },
+  verificarMayus: function(cadena){
+    return this.patronMayus.test(cadena);
   }
 };
 
@@ -41,6 +57,7 @@ const modulos = new Vue({
     claseReportes: '',
     claseGrupos: '',
     claseRuta: '',
+    claseAudio: '',
     rutaProyecto: ''
   },
   methods:{
@@ -61,6 +78,7 @@ const modulos = new Vue({
         case 'reportes':
           this.claseReportes = 'active';
           $('#modReportes').css('display', 'block');
+          modReportes.mostrarGrupos(this.rutaProyecto);
           break;
         case 'grupos':
           this.claseGrupos = 'active';
@@ -72,6 +90,10 @@ const modulos = new Vue({
           $('#modRuta').css('display', 'block');
           //modRuta.editar(this.rutaProyecto);
           break;
+        case 'audio':
+          this.claseAudio = 'active';
+          $('#modAudio').css('display', 'block');
+
       }
     },
     ocultar: function(){
@@ -80,11 +102,13 @@ const modulos = new Vue({
       this.claseReportes = '';
       this.claseGrupos = '';
       this.claseRuta = '';
+      this.claseAudio = '';
       $('#modCanales').css('display', 'none');
       $('#modPuntos').css('display', 'none');
       $('#modReportes').css('display', 'none');
       $('#modGrupos').css('display', 'none');
       $('#modRuta').css('display', 'none');
+      $('#modAudio').css('display', 'none');
     }
   },
   created: function(){
@@ -93,17 +117,6 @@ const modulos = new Vue({
     this.cambiar('ruta');
   }
 });
-
-const VerificarCadenas = {
-  patron: /^[A-Z]{1}[a-zA-Z0-9]*$/,
-  patronMayus: /^[A-Z]{1}[A-Z0-9]*$/,
-  verificar: function(cadena){
-    return this.patron.test(cadena);
-  },
-  verificarMayus: function(cadena){
-    return this.patronMayus.test(cadena);
-  }
-};
 
 var modCanales = new Vue({
   el: '#modCanales',
@@ -207,7 +220,6 @@ var modCanales = new Vue({
           }else{
             let resp = this.evaluarFormulario();//object
             if(resp['error'] === ''){
-              console.log(this._infoOriginal);
               let tmp = {
                 archivo: this.nArchivo,
                 nombre: this.nNombre,
@@ -228,7 +240,6 @@ var modCanales = new Vue({
           }else{
             let resp = this.evaluarFormulario();
             if(resp['error'] === ''){
-              console.log(this._infoOriginal);
               let tmp = {
                 archivo: this.nArchivo,
                 nombre: this.nNombre,
@@ -296,11 +307,9 @@ var modCanales = new Vue({
       this.seleccionID = id;
     },
     mostrarInformacion: function(id){
-      console.log(id + ' has been clicked');
       this.presionarBoton(id);
 
       //establecemos informacion
-      console.log(this.infoCanales['canales'][id]['archivo']);
       this.setFormInformacion();
       //mostrar formulario de informacion
       this.vista = 'i';
@@ -385,17 +394,14 @@ var modPuntos = new Vue({
         cont['id'] = tmp[i];
         this.canales.push(cont);
       }
-      console.log(this.canales);
       /*this.limpiar();*/
     },
     cambiarCanal: function(){
       switch (this.canalSeleccionado) {
         case '-':
-          console.log('borrar todo');
           this.limpiarPuntos();
           break;
         default:
-          console.log('colocar informacion');
           Modelo.obtenerInformacion(this.rutaConfig + this.canalSeleccionado, 'pp')
           break;
 
@@ -403,6 +409,19 @@ var modPuntos = new Vue({
     },
     ocultar: function(id){
       $('#'+id).toggleClass('ocultarPuntos');
+    },
+    restablecerInformacion: function(){
+      this.limpiarPuntos();
+      this.limpiarCampos();
+      //this.canalSeleccionado =  '-';
+      this.puntoSeleccionado = '';
+      this.tipoNuevo = '-';
+      this.base = path.sep + 'Informacion' + path.sep;
+      this.rutaConfig = '';
+      this.infoCanales = {};
+      this.infoPuntos = {};
+      this.__infoPuntosOriginal = {};
+      this.canales = [];
     },
     limpiarPuntos: function(){
       this.listaPuntos = [];
@@ -464,8 +483,6 @@ var modPuntos = new Vue({
       //cargamos la Informacion
       switch (tipo) {
         case 'p':
-          console.log('Puntos:');
-          console.log(this.listaPuntos[index]);
           this.importancia = this.infoPuntos['puntos'][this.listaPuntos[index]]['importancia'];
           this.observaciones = this.infoPuntos['puntos'][this.listaPuntos[index]]['observaciones'];
           this.indicaciones = this.infoPuntos['puntos'][this.listaPuntos[index]]['indicaciones'];
@@ -476,14 +493,10 @@ var modPuntos = new Vue({
           this.clave = id;
           break;
         case 'e':
-          console.log('Elementos:');
-          console.log(this.listaElemento[index]);
           this.elemento = this.listaElemento[index]['tipo'];
           this.nombre = this.listaElemento[index]['valor'];
           break;
         case 'a':
-          console.log('Afuera:');
-          console.log(this.listaAfuera[index]);
           this.clave = this.listaAfuera[index]['tipo'];
           this.nombre = this.listaAfuera[index]['valor'];
           break;
@@ -523,7 +536,6 @@ var modPuntos = new Vue({
       this.limpiarCampos();
     },
     seleccionarForm: function(){
-      console.log(this.tipoNuevo);
       this.tipo = 'nuevo-' + this.tipoNuevo;
       $('#divNuevo').addClass('ocultarFormularios');
       $('#divEditar').removeClass('ocultarFormularios');
@@ -531,76 +543,90 @@ var modPuntos = new Vue({
     },
     editar: function(){
       if(this.tipo.length === 1){
-        console.log('mostrar Editar');
         this.tipo = 'edit-' + this.tipo;
         this.tipoNuevo = '-';
-      }else{
-        console.log('editar mostrado');
       }
     },
-    eliminar: function(){
+    eliminar: async function(){
       let tipoTMP = this.tipo;
+      let resp = 0;
       if(tipoTMP.length > 1){
         tipoTMP = this.tipo.split('-')[1];
       }
-      console.log(this.infoPuntos);
-      console.log(this.tipo);
-      console.log(this.tipoNuevo);
       switch (tipoTMP) {
         case 'p':
-          swal('¡Atención!', '¿Seguro que desea eliminar el punto: '+ this.listaPuntos[this.indice] +'?',{
+          resp = await swal('¡Atención!', '¿Seguro que desea eliminar el punto: '+ this.listaPuntos[this.indice] +'?',{
             buttons: true,
             dangerMode:true
           }).then((val) => {
-            if(val){
-              delete this.infoPuntos['puntos'][this.listaPuntos[this.indice]];
-            }else{
-              return;
-            }
+            return new Promise(resolve => {
+              if(val){
+                delete this.infoPuntos['puntos'][this.listaPuntos[this.indice]];
+                resolve(1);
+              }else{
+                resolve(0);
+              }
+            });
           });
           break;
         case 'e':
-          swal('¡Atención!', '¿Seguro que desea eliminar el punto elemento: '+ this.listaElemento[this.indice]['valor'] +'?',{
+          resp = await swal('¡Atención!', '¿Seguro que desea eliminar el punto elemento: '+ this.listaElemento[this.indice]['valor'] +'?',{
             buttons: true,
             dangerMode:true
           }).then((val) => {
-            if(val){
-              this.eliminarElemento(this.listaElemento[this.indice]['tipo'], this.listaElemento[this.indice]['valor']);
-            }else{
-              return;
-            }
+            return new Promise(resolve => {
+              if(val){
+                this.eliminarElemento(this.listaElemento[this.indice]['tipo'], this.listaElemento[this.indice]['valor']);
+                resolve(1);
+              }else{
+                resolve(0);
+              }
+            });
           });
           break;
         case 'a':
-          swal('¡Atención!', '¿Seguro que desea eliminar el elemento: '+ this.listaAfuera[this.indice]['valor'] +'?',{
+          resp = await swal('¡Atención!', '¿Seguro que desea eliminar el elemento: '+ this.listaAfuera[this.indice]['valor'] +'?',{
             buttons: true,
             dangerMode:true
           }).then((val) => {
-            if(val){
-              delete this.infoPuntos['afuera'][this.listaAfuera[this.indice]['tipo']];
-            }else{
-              return;
-            }
+            return new Promise(resolve => {
+              if(val){
+                delete this.infoPuntos['afuera'][this.listaAfuera[this.indice]['tipo']];
+                resolve(1);
+              }else{
+                resolve(0);
+              }
+            });
           });
           break;
+      }
+      if(resp === 0)return;
+      else{
+        console.log('....::::::...... BorrarInfo ....::::::......');
+        Modelo.guardarPunto(this.rutaConfig + this.canalSeleccionado, this.infoPuntos);
       }
     },
     guardar: async function(){
       let tipoTMP = this.tipo.split('-')[1];
       let respuesta = false;
-      console.log(this.infoPuntos);
       if(this.tipoNuevo !== '-'){
-        console.log('Elemento Nuevo');
         if(this.canalSeleccionado === ''){
           swal('Advertencia', 'Favor de elegir un canal', 'warning');
           return
         }
         switch (tipoTMP) {
           case 'p':
-            console.log('evaluando: ' + this.clave);
             respuesta = VerificarCadenas.verificar(this.clave);
             if(!respuesta){
-              await swal('Error', 'El nombre clave debe contener solamente caracteres alfanuméricos, iniciar con una letra mayúscula y no contener espacios.', 'error').then((value) => {
+              await swal('Error', 'El nombre clave debe contener solamente caracteres alfanuméricos, iniciar con una letra mayúscula y puede tener espacios.', 'error').then((value) => {
+                return new Promise(resolve => {
+                  resolve();
+                })
+              });
+              return;
+            }
+            if(this.nombre === ''){
+              await swal('Error', 'El nombre traducido no puede quedar vacío', 'error').then((value) => {
                 return new Promise(resolve => {
                   resolve();
                 })
@@ -610,15 +636,14 @@ var modPuntos = new Vue({
             //checar si el nombre se ha repetido
             if(this.listaPuntos.indexOf(this.clave) === -1){
               //agregar el registro
-              console.log('agregando punto: ' + this.clave);
               let tmp = {
                 importancia: 1,
                 observaciones: '',
                 indicaciones: '',
                 funcion: '',
-                posicion: -1,
+                posicion: this.posicion,
                 localizacion: '',
-                nombre: ''
+                nombre: this.nombre
               };
               this.infoPuntos['puntos'][this.clave] = tmp;
               //enviar A modificar info
@@ -633,7 +658,6 @@ var modPuntos = new Vue({
             }
             break;
           case 'e':
-            console.log('evaluando: ' + this.nombre);
             respuesta = VerificarCadenas.verificar(this.nombre);
             if(!respuesta){
               await swal('Error', 'El nombre debe contener solamente caracteres alfanuméricos, iniciar con una letra mayúscula y no contener espacios.', 'error').then((value) => {
@@ -662,12 +686,10 @@ var modPuntos = new Vue({
               return;
             }else{
               //insertamos nuevo elemento
-              console.log('agregando elemento:' + this.nombre);
               this.infoPuntos['elementos'][this.elemento].push(this.nombre);
             }
             break;
           case 'a':
-            console.log('evaluando: ' + this.nombre);
             respuesta = VerificarCadenas.verificar(this.nombre);
             if(!respuesta){
               await swal('Error', 'El nombre debe contener solamente caracteres alfanuméricos, iniciar con una letra mayúscula y no contener espacios.', 'error').then((value) => {
@@ -677,7 +699,6 @@ var modPuntos = new Vue({
               });
               return;
             }
-            console.log('evaluando: ' + this.clave);
             respuesta = VerificarCadenas.verificarMayus(this.clave);
             if(!respuesta){
               await swal('Error', 'La clave debe contener solamente caracteres alfanuméricos, letras mayúsculas y no contener espacios.', 'error').then((value) => {
@@ -705,16 +726,15 @@ var modPuntos = new Vue({
                 })
                 return;
               }else{
-                console.log('agregando afuera: ' + this.nombre);
                 this.infoPuntos['afuera'][this.clave] = this.nombre;
               }
             }
             break;
         }
       }else{
-        console.log('Elemento Editar');
         switch (tipoTMP) {
           case 'p':
+          console.log('punto EDITADO');
             //evaluar cadena
             respuesta = VerificarCadenas.verificar(this.clave);
             if(!respuesta){
@@ -726,9 +746,10 @@ var modPuntos = new Vue({
               return;
             }
             //checar si el nombre es el mismo o ha cambiado
-            console.log(this.listaPuntos[this.indice]);
             if(this.listaPuntos[this.indice] === this.clave){
-              return;
+              //guardamos los cambios del nombre y posicion
+              this.infoPuntos['puntos'][this.listaPuntos[this.indice]]['nombre'] = this.nombre;
+              this.infoPuntos['puntos'][this.listaPuntos[this.indice]]['posicion'] = this.posicion;
             }else if(this.listaPuntos.indexOf(this.clave) !== -1 && this.listaPuntos[this.indice] !== this.clave){
               await swal('Error', 'El nombre clave ya existe', 'error').then((value) => {
                 return new Promise(resolve => {
@@ -737,7 +758,6 @@ var modPuntos = new Vue({
               });
               return;
             }else{
-              console.log('Guardar el nombre nuevo y eliminar el anterior');
               let tmp = this.infoPuntos['puntos'][this.listaPuntos[this.indice]];
               this.infoPuntos['puntos'][this.clave] = tmp;
               delete this.infoPuntos['puntos'][this.listaPuntos[this.indice]];
@@ -765,7 +785,6 @@ var modPuntos = new Vue({
             }
             //revisar si no hubo cambios
             if(this.listaElemento[this.indice]['valor'] === this.nombre && this.listaElemento[this.indice]['tipo'] === this.elemento){
-              console.log('sin cambios');
               return;
             }
             //revisar si el nombre ya se encuentra en existencia
@@ -804,9 +823,7 @@ var modPuntos = new Vue({
               return;
             }
             //evaluamos si no hubo cambios
-            console.log(this.indice);
             if(this.listaAfuera[this.indice]['valor'] === this.nombre && this.listaAfuera[this.indice]['tipo'] === this.clave){
-              console.log('sin cambios');
               return;
             }else{
               //verificamos si la clave ya existe
@@ -833,6 +850,8 @@ var modPuntos = new Vue({
             break;
         }
       }
+      console.log('....::::::...... guardarInfo ....::::::......');
+      Modelo.guardarPunto(this.rutaConfig + this.canalSeleccionado, this.infoPuntos);
     },
     eliminarElemento: function(tipo, nombre){
       let indice = this.infoPuntos['elementos'][tipo].indexOf(nombre);
@@ -840,7 +859,6 @@ var modPuntos = new Vue({
       return;
     },
     buscarElemento: function(lista, nombre, id){
-      console.log('entrando a funcion');
       for(let i=0 ; i < lista.length ; i++){
         if(lista[i][id] === nombre){
           return true;
@@ -854,6 +872,247 @@ var modPuntos = new Vue({
 var modReportes = new Vue({
   el: '#modReportes',
   data:{
+    temporal: [],
+    ruta: '',
+    misReportes: {},
+    nombreMeses: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+    grupos: [],
+    tipos: [],
+    meses: {},
+    numReporte: {},
+    grupo: '-',
+    mes: '-',
+    tipo: '-',
+    chart: null,
+    dataSet: [],
+    repGrupo:{
+      total: 0,
+      aprobadas: 0,
+      reprobadas: 0,
+      porcentaje: 0,
+      mejor: [],
+      peor: []
+    }
+  },
+  methods:{
+    mostrarGrupos: function(rutaProyecto){
+      this.ruta  = rutaProyecto + path.sep + 'Informacion' + path.sep + 'reportes.json';
+      Modelo.obtenerInformacion(this.ruta, 'r');
+    },
+    seleccionarGrupo: function(){
+      this.tipos = [];
+      this.meses = {};
+      this.tipo = '-';
+      this.mes = '-';
+      for(let tipo in this.misReportes[this.grupo]){
+        this.tipos.push(tipo);
+      }
+      this.limpiarReporteGrupo();
+      this.generarReporteGrupo();
+      this.generarGrafica();
+    },
+    generarGrafica: function(){
+      let ctx = null;
+      let periodo = 'month';
+      let diff = 0;
+      //limpiar Datos
+      this.dataSet = [];
+      //Quitar grafica
+      if(this.chart !== null){
+        console.log('grafica eliminada');
+        this.chart.destroy();
+      }
+      //obtener todos los reportes con atributos porcentaje,fecha
+      for(let tipo in this.misReportes[this.grupo]){
+        if(this.tipo !== '-' && this.tipo !== tipo){
+          console.log('Saliendo!!!!');
+          continue;
+        }
+        for(let i=0 ; i < this.misReportes[this.grupo][tipo].length ; i++){
+          let tmp = {};
+          let porcentaje = this.getPorcentaje(this.misReportes[this.grupo][tipo][i]);
+          tmp['y'] = porcentaje;
+          tmp['x'] = this.misReportes[this.grupo][tipo][i]['fecha'];
+          this.colocarElementoGrupo(tmp);
+        }
+      }
+      console.log('...:::... Conjunto ...:::...');
+      console.log(this.dataSet);
+      //obtenemos diferencia de tiempo
+      if(this.dataSet.length !== 0){
+        diff = (this.dataSet[this.dataSet.length-1]['x'] - this.dataSet[0]['x'])/1000;
+      }
+      /*
+      1 hour = 3600
+      1 day = 86400
+      1 month = 2592000
+      */
+      if(diff < 3600){
+        periodo = 'minute';
+      }else if(diff < 86400){
+        periodo = 'hour';
+      }else if(diff < 2592000){
+        periodo = 'day';
+      }else{
+        periodo = 'week';
+      }
+      //crear la grafica
+      ctx = document.getElementById('grafica').getContext('2d');
+
+      this.chart = new Chart(ctx, {
+        type: 'line',
+        data:{
+          datasets: [{
+            label: '% de calificacion',
+            data: modReportes.dataSet,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            lineTension: 0.1
+          }]
+        },
+        options:{
+          responsive: true,
+          title: {
+            display: true,
+            text: 'Progreso en la calificación con respecto al tiempo'
+          },
+          scales:{
+            xAxes:[{
+              type: 'time',
+              time: {
+                displayFormats:{
+                  second: 'h:mm:ss a',
+                  minute: 'h:mm: a',
+                  hour: 'h:mm: a',
+                  day: 'MMM D',
+                  week: 'll',
+                  month: 'll'
+                },
+                unit: periodo
+              },
+              scaleLabel: {
+                display:true,
+                labelString: periodo
+              }
+            }],
+            yAxes:[{
+              scaleLabel:{
+                display: true,
+                labelString: 'Porcentaje - %'
+              },
+              ticks:{
+                max:100
+              }
+            }]
+          }
+        }
+      });
+
+    },
+    colocarElementoGrupo: function(tmp){
+      //splice(posicion, 0sinelementos, elementoInsertar)
+      for(let i=0 ; i < this.dataSet.length ; i++){
+        if(this.dataSet[i]['x'] > tmp['x']){
+          this.dataSet.splice(i,0,tmp);
+          return;
+        }
+      }
+      this.dataSet.push(tmp);
+      return;
+
+    },
+    limpiarReporteGrupo: function(){
+      this.repGrupo['total'] = 0;
+      this.repGrupo['aprobadas'] = 0;
+      this.repGrupo['reprobadas'] = 0;
+      this.repGrupo['porcentaje'] = 0;
+      this.repGrupo['mejor'] = [0,'Sin Datos'];
+      this.repGrupo['peor'] = [0,'Sin Datos'];
+    },
+    generarReporteGrupo: function(){
+      let mejorTMP = [0,'sin datos'];
+      let peorTMP = [0,'sin datos'];
+      let califTotal = 0.0;
+      //obtener numero de pruebas
+      for(let tipo in this.misReportes[this.grupo]){
+        if(this.tipo !== '-' && this.tipo !== tipo){
+          console.log('Saliendo!!!!');
+          continue;
+        }
+        this.repGrupo['total'] += this.misReportes[this.grupo][tipo].length;
+        for(let i=0 ; i < this.misReportes[this.grupo][tipo].length ; i++){
+          let porcentaje = parseFloat(this.getPorcentaje(this.misReportes[this.grupo][tipo][i]));
+          califTotal += porcentaje;
+          //aprobados y reprobados
+          if(porcentaje >= 60.0){
+            this.repGrupo['aprobadas'] += 1;
+          }else{
+            this.repGrupo['reprobadas'] += 1;
+          }
+          //mejor y peor
+          if(mejorTMP[0] < porcentaje){
+            //comparamos si el mejor que sale no es el menor tambien
+            if(peorTMP[0] > mejorTMP[0] && mejorTMP[1] !== 'sin datos'){
+              peorTMP[0] = porcentaje;
+              peorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
+            }
+            mejorTMP[0] = porcentaje;
+            mejorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
+
+          }else if(peorTMP[0] > porcentaje){
+            peorTMP[0] = porcentaje;
+            peorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
+          }else if(peorTMP[0] == porcentaje){
+            peorTMP[0] = porcentaje;
+            peorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
+          }
+        }
+
+        this.repGrupo['mejor'][0] = mejorTMP[0];
+        this.repGrupo['mejor'][1] = mejorTMP[1];
+        this.repGrupo['peor'][0] = peorTMP[0];
+        this.repGrupo['peor'][1] = peorTMP[1];
+      }
+      if(this.repGrupo['total'] != 0.0){
+        califTotal = parseFloat(califTotal/this.repGrupo['total']);
+        this.repGrupo['porcentaje'] = califTotal.toFixed(2);
+      }else{
+        this.repGrupo['porcentaje'] = 0.0;
+      }
+    },
+    getPorcentaje: function(reporte){
+      let total = parseFloat(reporte['total']);
+      let correctas = parseFloat(reporte['sumaCorrectas']);
+      let porcentaje = correctas * 100.0 / total;
+      return(porcentaje.toFixed(2));
+    },
+    seleccionarTipo: function(){
+      this.meses = {};
+      this.mes = '-';
+      for(let i in this.misReportes[this.grupo][this.tipo]){
+        let fecha = new Date(this.misReportes[this.grupo][this.tipo][i]['fecha']);
+        if(!this.meses[fecha.getMonth()]){
+          console.log('agregando:');
+          this.meses[fecha.getMonth()] = [i];
+        }else{
+          console.log('ya existe');
+          this.meses[fecha.getMonth()].push(i);
+        }
+        console.log(this.meses);
+      }
+      this.limpiarReporteGrupo();
+      this.generarReporteGrupo();
+      this.generarGrafica();
+    },
+    seleccionarMes: function(){
+      console.log(this.meses[this.mes]);
+      this.temporal = [];
+      for(let i=0 ; i < this.meses[this.mes].length ; i++){
+        console.log('AGREGANDO: ');
+        console.log(this.misReportes[this.grupo][this.tipo][this.meses[this.mes][i]]);
+        this.temporal.push(this.misReportes[this.grupo][this.tipo][this.meses[this.mes][i]]);
+      }
+    }
   }
 });
 
@@ -887,7 +1146,6 @@ var modGrupos = new Vue({
         this.grupos.push(this.infoConfig['grupos'][i]);
       }
       for(let element in this.infoConfig['grupos']){
-        console.log(element);
         tmp.push(element);
       }
       this.limpiar();
@@ -926,7 +1184,6 @@ var modGrupos = new Vue({
       }
     },
     mostrarInformacion: function(id, posicion){
-      console.log(id + ' has been clicked');
       this.posicion = posicion;
       this.presionarBoton(id);
       //establecemos informacion en formulario
@@ -992,7 +1249,6 @@ var modGrupos = new Vue({
               semestre: this.iSemestre,
               year: this.iyear
             };
-            console.log(this._infoOriginal['grupos'][this.posicion]);
             this._infoOriginal['grupos'][this.posicion] = tmp;
             Modelo.guardarGrupo(this.rutaConfig, this._infoOriginal);
           }else{
@@ -1025,7 +1281,6 @@ var modGrupos = new Vue({
     },
     eliminar: function(){},
     despliegaSemestre: function(){
-      console.log('year: ' + this.iyear);
       switch (this.iSemestre) {
         case '1':
           return('enero - julio');
@@ -1035,6 +1290,15 @@ var modGrupos = new Vue({
           break;
       }
     }
+  }
+});
+
+var modRuta = new Vue({
+  el: '#modAudio',
+  data:{
+    audio: ''
+  },
+  methods:{
   }
 });
 
@@ -1058,7 +1322,6 @@ var modRuta = new Vue({
 });
 
 ipcRenderer.on('channel1-response', (e,args) => {
-  console.log(args);
   if(args['err']){
     console.log('Ocurrió un error inesperado');
   }else{
@@ -1077,6 +1340,12 @@ ipcRenderer.on('obtenerInfo-response', (e,args) => {
 
   modCanales.setCanales();
 })
+
+ipcRenderer.on('guardar-punto-res', (e,args) => {
+  modPuntos.restablecerInformacion();
+  modPuntos.mostrarCanales(modulos.rutaProyecto);
+  modPuntos.cambiarCanal();
+});
 
 ipcRenderer.on('guardar-grupo-res', (e, args) => {
   modGrupos.limpiarFormularioNuevo();
@@ -1102,14 +1371,11 @@ ipcRenderer.on('oi-puntos-canales-res', (e, args) => {
 ipcRenderer.on('oi-puntos-puntos-res', (e,args) => {
   modPuntos.infoPuntos = JSON.parse(args);
   modPuntos.__infoPuntosOriginal = JSON.parse(args);
-  //console.log(modPuntos.infoPuntos);
   modPuntos.limpiarPuntos();
   //establecer el arreglo
-  console.log(modPuntos.infoPuntos['puntos']);
   for(let el in modPuntos.infoPuntos['puntos']){
     modPuntos.listaPuntos.push(el);
   }
-  console.log(modPuntos.infoPuntos['elementos']);
   for(let tipo in modPuntos.infoPuntos['elementos']){
     for(let i=0 ; i <  modPuntos.infoPuntos['elementos'][tipo].length ; i++){
       let tmp = {
@@ -1119,7 +1385,6 @@ ipcRenderer.on('oi-puntos-puntos-res', (e,args) => {
       modPuntos.listaElemento.push(tmp);
     }
   }
-  console.log(modPuntos.infoPuntos['afuera']);
   for(let tipo in modPuntos.infoPuntos['afuera']){
     let tmp = {
       tipo: tipo,
@@ -1127,4 +1392,9 @@ ipcRenderer.on('oi-puntos-puntos-res', (e,args) => {
     };
     modPuntos.listaAfuera.push(tmp);
   }
+})
+
+ipcRenderer.on('oi-reportes-grupos-res', (e,args) => {
+  modReportes.misReportes = JSON.parse(args);
+  console.log(modReportes.misReportes);
 })

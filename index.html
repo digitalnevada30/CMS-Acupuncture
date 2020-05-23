@@ -58,6 +58,14 @@
               </a>
             </li>
             <li>
+              <a href="#" :class="claseAudio" @click="cambiar('audio')">
+                <span class="icon ">
+                  <img src="./Iconos/speaker.png" width="25" height="25">
+                </span>
+                <span class="title">Audios</span>
+              </a>
+            </li>
+            <li>
               <a href="#" :class="claseRuta" @click="cambiar('ruta')">
                 <span class="icon ">
                   <img src="./Iconos/folder.png" width="25" height="25">
@@ -232,6 +240,7 @@
               <div class="row funcionesPuntos">
                 <div class="col-md-5">
                   <div class="row justify-content-center">
+                    <div class="col-md-3" style="color:#fff; font-size=16px; padding-top:3px;">Canales</div>
                     <div class="col-md-6">
                       <select class="selectPuntos" v-model="canalSeleccionado" v-on:change="cambiarCanal()">
                         <option value="-">Seleccione</option>
@@ -432,6 +441,22 @@
                           </div>
                           <div class="row">
                             <div class="col-md-12">
+                              <h3>Nombre Español</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <input type="text" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" placeholder="Introduce el Nombre" v-model="nombre">
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h3>Identificador</h3>
+                            </div>
+                            <div class="col-md-12">
+                              <input type="number" class="form-control mb-2" aria-label="Default" aria-describedby="inputGroup-sizing-default" v-model="posicion">
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-md-12">
                               <p>* Por favor una vez guardado el elemento llenar los campos en la aplicación</p>
                             </div>
                           </div>
@@ -468,11 +493,107 @@
 
                                                         <!-- :::::::::: Modulo de reportes :::::::::: -->
           <div id="modReportes" style="display:none;">
-            Este Texto corresponde al modulo de los Reportes <br>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-            nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
+            <div class="contenedorCanales">
+              <div class="row bannerReportes">
+                <div class="col-md-12">
+                  <div class="row justify-content-around">
+                    <div class="col-md-3">
+                      <div class="row">
+                        <div class="col-md-12 text-center" style="color:#fff;">
+                          Grupo
+                        </div>
+                      </div>
+                      <div class="row justify-content-center">
+                        <div class="col-md-9">
+                          <select class="selectReportes" v-model="grupo" @change="seleccionarGrupo()">
+                            <option value="-">Seleccione</option>
+                            <option v-for="(value,key) in misReportes" :value="key">{{key}}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-3" v-if="grupo !== '-'">
+                      <div class="row">
+                        <div class="col-md-12 text-center" style="color:#fff;">
+                          Tipo Juego
+                        </div>
+                      </div>
+                      <div class="row justify-content-center">
+                        <div class="col-md-9">
+                          <select class="selectReportes" v-model="tipo" @change="seleccionarTipo()">
+                            <option value="-">Seleccione</option>
+                            <option v-for="t in tipos" :value="t">{{t}}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-3" v-if="tipo !== '-'">
+                      <div class="row">
+                        <div class="col-md-12 text-center" style="color:#fff;">
+                          Mes
+                        </div>
+                      </div>
+                      <div class="row justify-content-center">
+                        <div class="col-md-9">
+                          <select class="selectReportes" v-model="mes" @change="seleccionarMes()">
+                            <option value="-">Seleccione</option>
+                            <option v-for="(value,index) in meses" :value="index">{{nombreMeses[index]}}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              <div class="row secInfoReportes">
+                <div class="col-md-12">
+                  <div class="row">
+                    <!-- seccion de informacion -->
+                    <div class="col-md-4">
+                      <div class="row">
+                        <div class="col-md-8"><h5>Total de reportes</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['total']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Aprobados</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['aprobadas']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Reprobados</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['reprobadas']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Promedio General</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['porcentaje']}}%</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Mejor Valoración</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['mejor'][1]}} {{repGrupo['mejor'][0]}}%</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Peor Valoración</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['peor'][1]}} {{repGrupo['peor'][0]}}%</p></div>
+                      </div>
+                      <div>
+
+
+
+
+
+
+                      </div>
+                    </div>
+                    <!-- Seccion de grafica -->
+                    <div class="col-md-8 divGraficaRep">
+                      <canvas id="grafica"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
                                                         <!-- :::::::::: Modulo de grupos :::::::::: -->
@@ -596,6 +717,19 @@
               </div>
             </div>
 
+          </div>
+
+                                                        <!-- :::::::::: Modulo de audios :::::::::: -->
+          <div id="modAudio" style="display:none;">
+            <div class="contenedorRuta">
+              <div class="contenidoRuta">
+                <div class="row">
+                  <div class="col-md-12 text-center">
+                    <p><h4>Módulo de Audios</h4></p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div id="modRuta" style="display:block;">
