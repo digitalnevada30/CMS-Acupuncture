@@ -85,9 +85,14 @@ ipcMain.on('channelAudio', (e,args) => {
     }else{
       console.log(result.filePaths[0]);
       let nombre = result.filePaths[0].split(path.sep);
-      console.log(nombre[nombre.length-1]);
+      let nuevaRuta = args
+      //produccion
+      //nuevaRuta += path.sep +
+      nuevaRuta += path.sep + 'public' + path.sep + 'Audios' + path.sep + nombre[nombre.length-1];
+      console.log(nuevaRuta);
+
       //transferir el archivo
-      //fs.copyFileSync(, 'destination.txt');
+      fs.copyFileSync(result.filePaths[0], nuevaRuta);
     }
   })
 })

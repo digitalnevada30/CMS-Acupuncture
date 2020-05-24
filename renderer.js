@@ -1298,13 +1298,19 @@ var modGrupos = new Vue({
 var modAudio = new Vue({
   el: '#modAudio',
   data:{
+    ruta: '',
     audio: ''
   },
   methods:{
     seleccionarArchivo: function(){
       console.log('archivo nuevo');
-      ipcRenderer.send('channelAudio', '');
+      console.log(this.ruta);
+      let miRuta = this.ruta;
+      ipcRenderer.send('channelAudio',miRuta);
     }
+  },
+  created: function(){
+    this.ruta = modulos.rutaProyecto;
   }
 });
 
