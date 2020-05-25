@@ -523,7 +523,7 @@
                         <div class="col-md-9">
                           <select class="selectReportes" v-model="tipo" @change="seleccionarTipo()">
                             <option value="-">Seleccione</option>
-                            <option v-for="t in tipos" :value="t">{{t}}</option>
+                            <option v-for="t in tipos" :value="t">{{misTipos(t)}}</option>
                           </select>
                         </div>
                       </div>
@@ -532,14 +532,14 @@
                     <div class="col-md-3" v-if="tipo !== '-'">
                       <div class="row">
                         <div class="col-md-12 text-center" style="color:#fff;">
-                          Mes
+                          Reportes
                         </div>
                       </div>
-                      <div class="row justify-content-center">
-                        <div class="col-md-9">
-                          <select class="selectReportes" v-model="mes" @change="seleccionarMes()">
+                      <div class="row">
+                        <div class="col-md-12">
+                          <select class="selectReportes" style="width: 100%;" v-model="reporte" @change="seleccionarReporte()">
                             <option value="-">Seleccione</option>
-                            <option v-for="(value,index) in meses" :value="index">{{nombreMeses[index]}}</option>
+                            <option v-for="value in reportes" :value="value['clave']">{{value['valor']}}</option>
                           </select>
                         </div>
                       </div>
@@ -552,7 +552,7 @@
                 <div class="col-md-12">
                   <div class="row">
                     <!-- seccion de informacion -->
-                    <div class="col-md-4">
+                    <div class="col-md-4" v-if="reporte === '-'">
                       <div class="row">
                         <div class="col-md-8"><h5>Total de reportes</h5></div>
                         <div class="col-md-4"><p>{{repGrupo['total']}}</p></div>
@@ -577,13 +577,51 @@
                         <div class="col-md-8"><h5>Peor Valoración</h5></div>
                         <div class="col-md-4"><p>{{repGrupo['peor'][1]}} {{repGrupo['peor'][0]}}%</p></div>
                       </div>
-                      <div>
-
-
-
-
-
-
+                    </div>
+                    <!-- seccion de informacion reporte individual t1-->
+                    <div class="col-md-4" v-if="desplegarRepIndividual('tipo1')">
+                      <div class="row">
+                        <div class="col-md-8"><h5>Calificación</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['calificacion']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Aciertos</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['aprobadas']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Errores</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['reprobadas']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Total</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['total']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Mejor Valoración</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['mejor'][1]}} {{repGrupo['mejor'][0]}}%</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Peor Valoración</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['peor'][1]}} {{repGrupo['peor'][0]}}%</p></div>
+                      </div>
+                    </div>
+                    <!-- seccion de informacion reporte individual t2-->
+                    <div class="col-md-4" v-if="desplegarRepIndividual('tipo2')">
+                      <div class="row">
+                        <div class="col-md-8"><h5>Calificación</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['calificacion']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Aciertos</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['aprobadas']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Errores</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['reprobadas']}}</p></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-8"><h5>Total</h5></div>
+                        <div class="col-md-4"><p>{{repGrupo['total']}}</p></div>
                       </div>
                     </div>
                     <!-- Seccion de grafica -->

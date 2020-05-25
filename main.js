@@ -87,12 +87,17 @@ ipcMain.on('channelAudio', (e,args) => {
       let nombre = result.filePaths[0].split(path.sep);
       let nuevaRuta = args
       //produccion
-      //nuevaRuta += path.sep +
       nuevaRuta += path.sep + 'public' + path.sep + 'Audios' + path.sep + nombre[nombre.length-1];
+      //nuevaRuta += path.sep +
       console.log(nuevaRuta);
 
       //transferir el archivo
-      fs.copyFileSync(result.filePaths[0], nuevaRuta);
+      try{
+        fs.copyFileSync(result.filePaths[0], nuevaRuta);
+        e.sender.send('channelAudio-res', {ok:'El archivo "'+ nombre[nombre.length-1] +'" se ha cargado exitosamente'});
+      }catch(err){
+        e.sender.send('channelAudio-res', {error:'Ha ocuriido un error'});
+      }
     }
   })
 })

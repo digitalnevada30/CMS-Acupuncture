@@ -643,7 +643,7 @@ var modPuntos = new Vue({
                 observaciones: '',
                 indicaciones: '',
                 funcion: '',
-                posicion: this.posicion,
+                posicion: parseInt(this.posicion),
                 localizacion: '',
                 nombre: this.nombre
               };
@@ -751,7 +751,7 @@ var modPuntos = new Vue({
             if(this.listaPuntos[this.indice] === this.clave){
               //guardamos los cambios del nombre y posicion
               this.infoPuntos['puntos'][this.listaPuntos[this.indice]]['nombre'] = this.nombre;
-              this.infoPuntos['puntos'][this.listaPuntos[this.indice]]['posicion'] = this.posicion;
+              this.infoPuntos['puntos'][this.listaPuntos[this.indice]]['posicion'] = parseInt(this.posicion);
             }else if(this.listaPuntos.indexOf(this.clave) !== -1 && this.listaPuntos[this.indice] !== this.clave){
               await swal('Error', 'El nombre clave ya existe', 'error').then((value) => {
                 return new Promise(resolve => {
@@ -880,14 +880,21 @@ var modReportes = new Vue({
     nombreMeses: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
     grupos: [],
     tipos: [],
+
+    reportes: [],
     meses: {},
+
     numReporte: {},
     grupo: '-',
+
+    reporte: '-',
     mes: '-',
+
     tipo: '-',
     chart: null,
     dataSet: [],
     repGrupo:{
+      calificacion: 0,
       total: 0,
       aprobadas: 0,
       reprobadas: 0,
@@ -903,8 +910,10 @@ var modReportes = new Vue({
     },
     seleccionarGrupo: function(){
       this.tipos = [];
+      this.reportes = [];
       this.meses = {};
       this.tipo = '-';
+      this.reporte = '-';
       this.mes = '-';
       for(let tipo in this.misReportes[this.grupo]){
         this.tipos.push(tipo);
@@ -1003,7 +1012,91 @@ var modReportes = new Vue({
                 labelString: 'Porcentaje - %'
               },
               ticks:{
-                max:100
+                max:100,
+                beginAtZero: true
+              }
+            }]
+          }
+        }
+      });
+
+    },
+    generarGraficaIndividual: function(){
+      let ctx = null;
+      let etiquetas = [];
+      let dataset = [];
+      let bg = [];
+      let bc = [];
+      let titulo = '';
+      let backgroundColor = [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ];
+      let borderColor = [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ];
+      //Quitar grafica
+      if(this.chart !== null){
+        console.log('grafica eliminada');
+        this.chart.destroy();
+      }
+      console.log('...:::... Conjunto ...:::...');
+      //crear la grafica
+      ctx = document.getElementById('grafica').getContext('2d');
+      //definimos registros por tipo
+      if(this.tipo === 'tipo1'){
+        titulo = '% de calificacion de elementos';
+        for(let i=0 ; i < this.repGrupo['porcentaje'].length ; i++){
+          etiquetas.push(this.repGrupo['porcentaje'][i]['clave']);
+          dataset.push(this.repGrupo['porcentaje'][i]['valor']);
+          bg.push(backgroundColor[i]);
+          bc.push(borderColor[i]);
+        }
+
+      }else if(this.tipo === 'tipo2'){
+        titulo = '% de calificacion del canal';
+        etiquetas.push(this.repGrupo['porcentaje'][0]['clave']);
+        dataset.push(this.repGrupo['porcentaje'][0]['valor']);
+        bg.push(backgroundColor[3]);
+        bc.push(borderColor[3]);
+      }
+      this.chart = new Chart(ctx, {
+        type: 'bar',
+        data:{
+          labels: etiquetas,
+          datasets: [{
+            label: 'Porcentajes',
+            data: dataset,
+            backgroundColor: bg,
+            borderColor: bc,
+            borderWidth: 1,
+            lineTension: 0.1
+          }]
+        },
+        options:{
+          responsive: true,
+          title: {
+            display: true,
+            text: titulo
+          },
+          scales:{
+            yAxes:[{
+              scaleLabel:{
+                display: true,
+                labelString: 'Porcentaje - %'
+              },
+              ticks:{
+                max:100,
+                beginAtZero: true
               }
             }]
           }
@@ -1024,6 +1117,7 @@ var modReportes = new Vue({
 
     },
     limpiarReporteGrupo: function(){
+      this.repGrupo['calificacion'] = 0;
       this.repGrupo['total'] = 0;
       this.repGrupo['aprobadas'] = 0;
       this.repGrupo['reprobadas'] = 0;
@@ -1054,13 +1148,19 @@ var modReportes = new Vue({
           //mejor y peor
           if(mejorTMP[0] < porcentaje){
             //comparamos si el mejor que sale no es el menor tambien
-            if(peorTMP[0] > mejorTMP[0] && mejorTMP[1] !== 'sin datos'){
-              peorTMP[0] = porcentaje;
-              peorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
+            if(peorTMP[1] === 'sin datos'){
+              peorTMP[0] = mejorTMP[0];
+              peorTMP[1] = mejorTMP[1];
+            }else if(peorTMP[0] > mejorTMP[0]){
+              peorTMP[0] = mejorTMP[0];
+              peorTMP[1] = mejorTMP[1];
             }
             mejorTMP[0] = porcentaje;
             mejorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
 
+          }else if(peorTMP[1] === 'sin datos'){
+            peorTMP[0] = porcentaje;
+            peorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
           }else if(peorTMP[0] > porcentaje){
             peorTMP[0] = porcentaje;
             peorTMP[1] = this.misReportes[this.grupo][tipo][i]['canal'];
@@ -1082,38 +1182,127 @@ var modReportes = new Vue({
         this.repGrupo['porcentaje'] = 0.0;
       }
     },
+    generarReporteIndividual: function(){
+      let mejorTMP = [0,'sin datos'];
+      let peorTMP = [0,'sin datos'];
+      let califTotal = 0.0;
+      let tmp = ['fuego','tierra','agua','metal','madera','afuera'];
+      console.log(this.misReportes[this.grupo][this.tipo][this.reporte]);
+      //hacemos una distincion por tipos de reportes:
+      if(this.tipo === 'tipo1'){
+        //reporte de puntos
+        //calificacion
+        califTotal = this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'] * 10 / this.misReportes[this.grupo][this.tipo][this.reporte]['total'];
+        califTotal = parseFloat(califTotal.toFixed(2));
+        this.repGrupo['calificacion'] = califTotal;
+        //aciertos
+        this.repGrupo['aprobadas'] = this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'];
+        //errores
+        this.repGrupo['reprobadas'] = this.misReportes[this.grupo][this.tipo][this.reporte]['total'] - this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'];
+        //total
+        this.repGrupo['total'] = this.misReportes[this.grupo][this.tipo][this.reporte]['total'];
+        //obtener porcentajes de resultados
+        this.repGrupo['porcentaje'] = [];
+        //porcentajes
+        for(let i=0 ; i < tmp.length ; i++){
+          califTotal = this.misReportes[this.grupo][this.tipo][this.reporte][tmp[i]][0] * 100 / this.misReportes[this.grupo][this.tipo][this.reporte][tmp[i]][1];
+          califTotal = parseFloat(califTotal.toFixed(2));
+          this.repGrupo['porcentaje'].push({clave:tmp[i],valor:califTotal});
+        }
+
+        //Mejor y peor
+        for(let i=0 ; i < this.repGrupo['porcentaje'].length ; i++){
+          if(mejorTMP[0] < this.repGrupo['porcentaje'][i]['valor']){
+            //comparamos si el mejor que sale no es el menor tambien
+            if(peorTMP[1] === 'sin datos'){
+              peorTMP[0] = mejorTMP[0];
+              peorTMP[1] = mejorTMP[1];
+            }else if(peorTMP[0] > mejorTMP[0]){
+              peorTMP[0] = mejorTMP[0];
+              peorTMP[1] = mejorTMP[1];
+            }
+            mejorTMP[0] = this.repGrupo['porcentaje'][i]['valor'];
+            mejorTMP[1] = this.repGrupo['porcentaje'][i]['clave'];
+
+          }else if(peorTMP[1] === 'sin datos'){
+            peorTMP[0] = this.repGrupo['porcentaje'][i]['valor'];
+            peorTMP[1] = this.repGrupo['porcentaje'][i]['clave'];
+          }else if(peorTMP[0] > this.repGrupo['porcentaje'][i]['valor']){
+            peorTMP[0] = this.repGrupo['porcentaje'][i]['valor'];
+            peorTMP[1] = this.repGrupo['porcentaje'][i]['clave'];
+          }else if(peorTMP[0] == this.repGrupo['porcentaje'][i]['valor']){
+            peorTMP[0] = this.repGrupo['porcentaje'][i]['valor'];
+            peorTMP[1] = this.repGrupo['porcentaje'][i]['clave'];
+          }
+        }
+
+        this.repGrupo['mejor'][0] = mejorTMP[0];
+        this.repGrupo['mejor'][1] = mejorTMP[1];
+        this.repGrupo['peor'][0] = peorTMP[0];
+        this.repGrupo['peor'][1] = peorTMP[1];
+
+
+
+      }else if(this.tipo === 'tipo2'){
+        //reporte del modelo
+        //calificacion
+        califTotal = this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'] * 10 / this.misReportes[this.grupo][this.tipo][this.reporte]['total'];
+        califTotal = parseFloat(califTotal.toFixed(2));
+        this.repGrupo['calificacion'] = califTotal;
+        //aciertos
+        this.repGrupo['aprobadas'] = this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'];
+        //errores
+        this.repGrupo['reprobadas'] = this.misReportes[this.grupo][this.tipo][this.reporte]['total'] - this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'];
+        //total
+        this.repGrupo['total'] = this.misReportes[this.grupo][this.tipo][this.reporte]['total'];
+        //porcentaje
+        califTotal = this.misReportes[this.grupo][this.tipo][this.reporte]['sumaCorrectas'] * 100 / this.misReportes[this.grupo][this.tipo][this.reporte]['total'];
+        califTotal = parseFloat(califTotal.toFixed(2));
+        this.repGrupo['porcentaje'] = [{clave: this.misReportes[this.grupo][this.tipo][this.reporte]['canal'],valor:califTotal}];
+      }
+    },
     getPorcentaje: function(reporte){
       let total = parseFloat(reporte['total']);
       let correctas = parseFloat(reporte['sumaCorrectas']);
       let porcentaje = correctas * 100.0 / total;
       return(porcentaje.toFixed(2));
     },
+    misTipos: function(tipo){
+      if(tipo === 'tipo1'){
+        return 'Puntos';
+      }else if(tipo === 'tipo2'){
+        return 'Modelo';
+      }
+    },
+    desplegarRepIndividual: function(t){
+      if(this.reporte !== '-' && t === this.tipo){
+        return true;
+      }else{
+        return false;
+      }
+    },
     seleccionarTipo: function(){
-      this.meses = {};
-      this.mes = '-';
+      this.reportes = [];
+      this.reporte = '-';
+      //establecemos la informacion de los reportes individuales
       for(let i in this.misReportes[this.grupo][this.tipo]){
         let fecha = new Date(this.misReportes[this.grupo][this.tipo][i]['fecha']);
-        if(!this.meses[fecha.getMonth()]){
-          console.log('agregando:');
-          this.meses[fecha.getMonth()] = [i];
-        }else{
-          console.log('ya existe');
-          this.meses[fecha.getMonth()].push(i);
-        }
-        console.log(this.meses);
+        let valor = this.misReportes[this.grupo][this.tipo][i]['canal'] + ' - ' + this.nombreMeses[fecha.getMonth()] + ' ' + fecha.getDate();
+        valor += ' - ' + fecha.getHours() + ':' + fecha.getMinutes();
+        let elemento = {
+          clave: i,
+          valor: valor
+        };
+        this.reportes.push(elemento);
       }
       this.limpiarReporteGrupo();
       this.generarReporteGrupo();
       this.generarGrafica();
     },
-    seleccionarMes: function(){
-      console.log(this.meses[this.mes]);
-      this.temporal = [];
-      for(let i=0 ; i < this.meses[this.mes].length ; i++){
-        console.log('AGREGANDO: ');
-        console.log(this.misReportes[this.grupo][this.tipo][this.meses[this.mes][i]]);
-        this.temporal.push(this.misReportes[this.grupo][this.tipo][this.meses[this.mes][i]]);
-      }
+    seleccionarReporte:function(){
+      this.limpiarReporteGrupo();
+      this.generarReporteIndividual();
+      this.generarGraficaIndividual();
     }
   }
 });
@@ -1330,6 +1519,16 @@ var modRuta = new Vue({
   },
   created: function(){
     this.ruta = modulos.rutaProyecto;
+  }
+});
+
+ipcRenderer.on('channelAudio-res', (e,args) => {
+  if(args['error']){
+    swal('Error','No se ha podido subir el archivo', 'error');
+  }else{
+    if(args['ok'] !== ''){
+      swal('Aviso','Se ha cargado el archivo en el proyecto.', 'success');
+    }
   }
 });
 
