@@ -1470,7 +1470,23 @@ var modGrupos = new Vue({
     editar: function(){
       this.vista = 'e';
     },
-    eliminar: function(){},
+    eliminar: async function(){
+      await swal('¡Atención!', '¿Seguro que desea eliminar el grupo: '+ this._infoOriginal['grupos'][this.posicion]['nombre'] +'?',{
+        buttons: true,
+        dangerMode:true
+      }).then((val) => {
+        return new Promise(resolve => {
+          if(val){
+            console.log(this._infoOriginal['grupos'][this.posicion]);
+            this._infoOriginal['grupos'].splice(this.posicion,1);
+            Modelo.guardarGrupo(this.rutaConfig, this._infoOriginal);
+            resolve(1);
+          }else{
+            resolve(0);
+          }
+        });
+      });
+    },
     despliegaSemestre: function(){
       switch (this.iSemestre) {
         case '1':
