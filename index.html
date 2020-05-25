@@ -782,7 +782,7 @@
                 <div class="row">
                   <div class="col-md-12 text-center">
                     <p><h4>La carpeta de la aplicación de Acupuntura es: </h4></p>
-                    <p><h6>"{{ruta}}"</h6></p>
+                    <p><h6>"{{desplegarRuta()}}"</h6></p>
                   </div>
                 </div>
 
@@ -807,6 +807,9 @@
   <script src="./Herramientas/SweetAlert/sweetalert.min.js"></script>
   <script src="./Herramientas/Vue/vue.js"></script>
   <script>
+    const PATH = require('path');
+    const PRODUCCION = require('./Produccion');
+    PRODUCCION.evaluar(localStorage.getItem('ruta') || '');
     console.log(window.module);
     $(document).ready(function(){
       $(".hamburger").click(function(){

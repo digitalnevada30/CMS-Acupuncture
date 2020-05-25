@@ -3,7 +3,7 @@ const {ipcRenderer} = require('electron')
 const path = require('path');
 const $ = require('jquery');
 const Chart = require('chart.js');
-
+const Produccion = path.sep + 'resources' + path.sep + 'app';
 const Modelo = {
   obtenerInformacion: function(archivo, tipo){
     switch (tipo) {
@@ -1515,6 +1515,13 @@ var modRuta = new Vue({
     },
     seleccionarCarpeta: function(){
       ipcRenderer.send('channel1', 'Hello from main window');
+    },
+    desplegarRuta:function(){
+      if(this.ruta.indexOf(path.sep + 'resources' + path.sep + 'app') !== -1){
+        return this.ruta.split(path.sep + 'resources' + path.sep + 'app')[0] + ' (produccion)';
+      }else{
+        return this.ruta + ' (desarrollo)';
+      }
     }
   },
   created: function(){
@@ -1537,10 +1544,12 @@ ipcRenderer.on('channel1-response', (e,args) => {
     console.log('Ocurrió un error inesperado');
   }else{
     if(!(args['ok'] === '' && this.ruta !== '')){
-      localStorage.setItem('ruta', args['ok']);
-      modRuta.setRuta(args['ok']);
+      PRODUCCION.evaluar(args['ok']);
+      //localStorage.setItem('ruta', args['ok']);
+      //modRuta.setRuta(args['ok']);
+      modRuta.setRuta(localStorage.getItem('ruta'));
     }else{
-      console.log('');
+      console.log('otro caso');
     }
   }
 })
