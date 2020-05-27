@@ -32,6 +32,10 @@ const Modelo = {
     let tmp = [archivo, objeto];
     ipcRenderer.send('guardar-grupo-req', tmp);
   },
+  borrarGrupo: function(archivo, obj){
+    let tmp = [archivo,obj['informacion'], obj['grupo']];
+    ipcRenderer.send('borrar-grupo-req', tmp);
+  },
   guardarPunto: function(archivo, objeto){
     let tmp = [archivo, objeto];
     ipcRenderer.send('guardar-punto-req', tmp);
@@ -1300,9 +1304,15 @@ var modReportes = new Vue({
       this.generarGrafica();
     },
     seleccionarReporte:function(){
-      this.limpiarReporteGrupo();
-      this.generarReporteIndividual();
-      this.generarGraficaIndividual();
+      if(this.reporte === '-'){
+        this.limpiarReporteGrupo();
+        this.generarReporteGrupo();
+        this.generarGrafica();
+      }else{
+        this.limpiarReporteGrupo();
+        this.generarReporteIndividual();
+        this.generarGraficaIndividual();
+      }
     }
   }
 });
@@ -1478,8 +1488,13 @@ var modGrupos = new Vue({
         return new Promise(resolve => {
           if(val){
             console.log(this._infoOriginal['grupos'][this.posicion]);
+            let tmp = {
+              informacion: null,
+              grupo: this._infoOriginal['grupos'][this.posicion]['nombre']
+            };
             this._infoOriginal['grupos'].splice(this.posicion,1);
-            Modelo.guardarGrupo(this.rutaConfig, this._infoOriginal);
+            tmp['informacion'] = this._infoOriginal;
+            Modelo.borrarGrupo(this.rutaConfig, tmp);
             resolve(1);
           }else{
             resolve(0);

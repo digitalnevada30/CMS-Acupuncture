@@ -62,6 +62,17 @@ ipcMain.on('guardar-grupo-req', (e, args) => {
   fs.writeFileSync(args[0], JSON.stringify(args[1]), 'utf8');
   e.sender.send('guardar-grupo-res', {ok: 'Archivo Guardado'});
 });
+ipcMain.on('borrar-grupo-req', (e, args) => {
+  fs.writeFileSync(args[0], JSON.stringify(args[1]), 'utf8');
+  //leer archivo reportes
+  let ruta = args[0].replace("config.json", "reportes.json");
+  var contenido = fs.readFileSync(ruta, 'utf8');
+  contenido = JSON.parse(contenido);
+  delete contenido[args[2]];
+  fs.writeFileSync(ruta, JSON.stringify(contenido), 'utf8');
+  //borrar el grupo
+  e.sender.send('guardar-grupo-res', {ok: 'Archivo Guardado'});
+});
 ipcMain.on('guardar-canal', (e, args) => {
   fs.writeFileSync(args[0],JSON.stringify(args[1]), 'utf8');
   e.sender.send('guardar-canal-response', {ok: 'respuesta Correcta'});
